@@ -1,8 +1,9 @@
-# Environment toy model programming test
+# A toy model of the environment
 
 ## Overview
 
-This is a simple programming test where the participant creates a toy model of the environment.
+This is a toy model of the environment.
+The source code could be run and test in both sbt console and eclipse-scala.
 
 ## Getting Started
 
@@ -28,7 +29,8 @@ with a three letter IATA code used as a station label.
 ## For Test Editors
 
 The test is designed to be relatively realistic in a variety of ways.  
-The specification is not as concise as it could be and not all of the requirements are covered directly in the requirements/description comment.  
-This is deliberate - we want the participant to browse and understand the related code in order to be able to proceed effectively.
+You could run the test in 2 ways:
+1. sbt test
+2. Eclipse-Scala
 
 
