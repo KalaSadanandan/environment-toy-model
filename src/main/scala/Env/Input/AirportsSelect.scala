@@ -29,6 +29,8 @@ object AirportsSelect {
       }
     }
 
+    source.close()
+
     infos
   }
 
