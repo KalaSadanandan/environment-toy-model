@@ -1,3 +1,8 @@
+/*                                                                      *\
+**    A Toy Model of Environment                           							**
+**    https://github.com/cubean/environment-toy-model.git               **
+\*                                                                      */
+
 package Env.Cal
 
 import java.time._
@@ -13,10 +18,26 @@ import Env.Model.Pressure._
 import Env.Model.Humidity._
 import Env.Model.Conditions._
 
+/**
+ *  Output weather information
+ *
+ *  @author Cubean Liu
+ *  @version 0.1
+ */
 object CalWeatherInfo {
 
+  // the format of input date and time
   private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+  /**
+   * get weather information string
+   *
+   * @param iada 3-letter IATA code
+   * @param localDT local date and time
+   *
+   * @return WeatherInfo String
+   * [SYD|-33.95,151.18,21|2016-06-08T05:52:35Z|Sunny|+14.0|1012.5|85]
+   */
   def getWeatherStr(iada: String, localDT: String): String = {
     val strNow = formatter.format(LocalDateTime.now())
     val infos = AirportsSelect.checkAirport(iada)
@@ -58,12 +79,21 @@ object CalWeatherInfo {
     }
   }
 
+  /**
+   * get weather information class
+   *
+   * @param iada 3-letter IATA code
+   * @param localDT local date and time
+   *
+   * @return WeatherInfo
+   *
+   */
   def getWeathInfo(x: AirportInfo, localDT: String): WeatherInfo = {
     try {
       val dt = LocalDateTime.parse(localDT, formatter)
       val zoneDT = ZonedDateTime.of(dt, ZoneId.of(x.Tz))
 
-      val temp = TempExpression.TempValue(x.Latitude, x.Longitude, dt)
+      val temp = TempExpression.TempValue(x.Latitude, dt)
       val pressure = PressureExpression.PressureValue(temp, x.Altitude) / 100
       val humidity = HumidityExpress.HumidityValue(temp, pressure)
       val weatherInfo = ConditionsExpress.HumidityValue(temp, humidity)
@@ -84,10 +114,31 @@ object CalWeatherInfo {
   }
 }
 
+/**
+ * Weather information class
+ *
+ * @param iata 3-letter IATA code.
+ * @param latitude Decimal degrees, usually to six significant digits. Negative is South, positive is North.
+ * @param longitude Decimal degrees, usually to six significant digits. Negative is West, positive is East.
+ * @param altitude In feet.
+ * @param dt ISO date time string.
+ * @param weatherInfo weather information string [Sunny, Rain or Snow]
+ * @param temp the temperature value of weather station.[C].
+ * @param pressure the pressure value of weather station. [Pa]
+ * @param humidity the humidity value of weather station. [%]
+ *
+ */
 case class WeatherInfo(iata: String, latitude: Double, longitude: Double, altitude: Double,
                        dt: String, weatherInfo: String, temp: Double, pressure: Double,
                        humidity: Double)
 
+/**
+ *  main program of Model of environment
+ *  get input loop from console: 
+ *  1. IATA code or airport English name
+ *  2. local date and time with format "yyyy-MM-dd HH:mm:ss"
+ *  
+ */
 object EnvValueCalculate extends App {
 
   //  println(CalWeatherInfo.getWeatherStr("SYD", "2015-12-23 16:02:12"))

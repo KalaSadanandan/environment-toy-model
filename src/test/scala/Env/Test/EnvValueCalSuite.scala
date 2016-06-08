@@ -1,3 +1,8 @@
+/*                                                                      *\
+**    A Toy Model of Environment                           							**
+**    https://github.com/cubean/environment-toy-model.git               **
+\*                                                                      */
+
 package Env.Test
 
 import org.junit.runner.RunWith
@@ -13,6 +18,9 @@ import Env.Input._
 import Env.Model.Pressure._
 import Env.Model.Humidity._
 
+/**
+ * the test for weather information from expression of Temperature,Pressure, Humidity and Conditions
+ */
 @RunWith(classOf[JUnitRunner])
 class EnvValueCalSpec extends FlatSpec with Matchers {
   Sample1.reportingStations.map(x => {
@@ -43,7 +51,7 @@ class EnvValueCalSpec extends FlatSpec with Matchers {
     val currentDays = DateTimeCal.getLocalDateTime(x._2).getDayOfYear
     val daysFlags = DateTimeCal.getDaysInSomeDay(x._2)
 
-    val tempAvg = TempAvgInLatitude.TemperatureCurves.value(weatherInfo.latitude)
+    val tempAvg = TempInLatitude.TemperatureAvgCurves.value(weatherInfo.latitude)
     //println("tempAvg =" + tempAvg)
 
     // In autumn and winter
@@ -87,10 +95,16 @@ class EnvValueCalSpec extends FlatSpec with Matchers {
   })
 }
 
+/**
+ * the first test sample
+ */
 object Sample1 {
 
-  val dtLocal = DateTimeCal.getCurrentLocalTimeStr
+  private val dtLocal = DateTimeCal.getCurrentLocalTimeStr
 
+  /**
+   * samples of some IATA and local date and time in weather stations 
+   */
   val reportingStations: Array[(String, String)] = Array(
 
     // Checking station in the Southern Hemisphere and 
@@ -147,13 +161,28 @@ object Sample1 {
     ("K03", "2016-07-04 23:05:37"))
 }
 
-object DateTimeCal {
-  val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+/**
+ * get some date time calculation result
+ */
+object DateTimeCal {
+  // the input format of date and time
+  private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+  /**
+   * get current local date and time string
+   */
   val getCurrentLocalTimeStr = {
     formatter.format(LocalDateTime.now())
   }
 
+  /**
+   * get current local date and time
+   * 
+   * @param dtStr local date and time string
+   * 
+   * @return LocalDateTime
+   */
   def getLocalDateTime(dtStr: String) = {
     LocalDateTime.parse(dtStr, formatter)
   }
@@ -171,6 +200,9 @@ object DateTimeCal {
 
 }
 
+/**
+ * the days of some key dates in a year: 21th March, 21th June, 22th September, 22th December
+ */
 case class DaysInSomeDay(daysof0321: Int, daysof0621: Int, daysof0922: Int, daysof1222: Int)
 
 

@@ -1,18 +1,40 @@
+/*                                                                      *\
+**    A Toy Model of Environment                           							**
+**    https://github.com/cubean/environment-toy-model.git               **
+\*                                                                      */
+
 package Env.Model.Temperature
 
 import java.text.SimpleDateFormat
 import java.time._
 import java.time.format._
 
+/**
+ *  Temperature expression
+ *  Obtain result according latitude and localDateTime.
+ *
+ *  @author Cubean Liu
+ *  @version 0.1
+ */
 object TempExpression {
-  def TempValue(latitude: Double, longitude: Double, dt: LocalDateTime) = {
+
+  /**
+   *  Get the temperature value according the latitude and localDateTime of weather station.
+   *  
+   *  @param latitude the latitude value of weather station.
+   *  @param dt  the local date and time of weather station.
+   */
+  def TempValue(latitude: Double, dt: LocalDateTime) = {
+
+    // Get average temperature
+    val tempAvg = TempInLatitude.TemperatureAvgCurves.value(latitude)
+
+    // Get the maximum range value of temperature variable
+    val tempTmax = math.abs(tempAvg * TempInLatitude.TmaxVariableCurves.value(latitude))
 
     // The value revised in a year by earth's orbit
     // I considered the Tropic of Cancer and the Tropic of Capricorn
     val tempReviseYear: Double = {
-
-      val Tmax = math.abs(TempAvgInLatitude.TemperatureCurves.value(latitude) *
-        TempAvgInLatitude.TmaxCurves.value(latitude))
 
       // 1
       // The regions between the Tropic of Cancer and the Tropic of Capricorn
@@ -42,7 +64,7 @@ object TempExpression {
       // sin(172 * 2 * Pi * 2 / 365 * w + q + Pi) = -1
       val w: Double = 365.0 / (2 * 2 * 2 * (172 - 80))
       val q: Double = math.Pi / 2 - 2 * math.Pi * 172 * 2 * w / 365
-      
+
       // 2
       // The regions out of the Tropic of Cancer and  the Tropic of Capricorn
       // sin(DayinHottest * 2 * Pi * / 365 + q) =  1
@@ -63,26 +85,28 @@ object TempExpression {
       val absLatitude = math.abs(latitude)
       if (latitude > -23.5 && latitude < 23.5) {
         if (dt.isAfter(dayslast1222) && dt.isBefore(daysin0922))
-          Tmax * math.sin(currentDays * 2 * math.Pi * (2 - absLatitude / 23.5) * w / 365 + q) * southRegion
+          tempTmax * math.sin(currentDays * 2 * math.Pi * (2 - absLatitude / 23.5) * w / 365 + q) * southRegion
         else {
-          Tmax * math.sin(currentDays * 2 * math.Pi * (2 - absLatitude / 23.5) * w / 365 + q +
+          tempTmax * math.sin(currentDays * 2 * math.Pi * (2 - absLatitude / 23.5) * w / 365 + q +
             math.Pi * (1 - absLatitude / 23.5)) * southRegion
         }
       } else
-        Tmax * math.sin(currentDays * 2 * math.Pi / 365 + qOut )* southRegion
+        tempTmax * math.sin(currentDays * 2 * math.Pi / 365 + qOut) * southRegion
     }
 
     // The value revised with day and night by earth rotation
     // I assumed the maximum variation range of temperature in a day is 10% of the latitude value.
     val tempReviseDay: Double = {
-      math.abs(TempAvgInLatitude.TemperatureCurves.value(latitude)) * 0.1 * 
-      math.cos((dt.getHour * 3600 + dt.getMinute * 60 + dt.getSecond) *
-        2 * math.Pi / (24 * 3600)) * (-1)
+      math.abs(tempAvg) * 0.1 *
+        math.cos((dt.getHour * 3600 + dt.getMinute * 60 + dt.getSecond) *
+          2 * math.Pi / (24 * 3600)) * (-1)
     }
 
-//    println("tempReviseYear:  " + dt.getMonth + "|" + tempReviseYear)
-//    println("tempReviseDay:  " + dt.getHour + "|" + tempReviseDay)
-    TempAvgInLatitude.TemperatureCurves.value(latitude) + tempReviseYear + tempReviseDay
+    //    println("tempReviseYear:  " + dt.getMonth + "|" + tempReviseYear)
+    //    println("tempReviseDay:  " + dt.getHour + "|" + tempReviseDay)
+
+    // Get the final value with 3 items
+    tempAvg + tempReviseYear + tempReviseDay
   }
 
 }

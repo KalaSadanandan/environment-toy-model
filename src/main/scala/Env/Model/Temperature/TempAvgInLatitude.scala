@@ -1,79 +1,50 @@
+/*                                                                      *\
+**    A Toy Model of Environment                           							**
+**    https://github.com/cubean/environment-toy-model.git               **
+\*                                                                      */
+
 package Env.Model.Temperature
 
-import org.apache.commons.math3.fitting._
-import org.apache.commons.math3.analysis.polynomials._
+import Env.Tools._
 
-object TempAvgInLatitude {
+/**
+ *  Get a temperature value with latitude value by polynomial curves
+ *
+ *  @author Cubean Liu
+ *  @version 0.1
+ */
+object TempInLatitude {
 
-  val TemperatureCurves = {
+  private val valLatitude = 85.0 to -85.0 by -10
+
+  /**
+   * Get an average temperature value with latitude value by polynomial curves
+   *
+   */
+  val TemperatureAvgCurves = {
 
     // The data contains some actual measurements 
     // from S.G. Warren & S.T. Schneider, J. Atmos. Sci. 36, 1377-91 (1979)
-    val regionAvg: Array[(Double, Double)] = Array(
-      (85, -16.9),
-      (75, -12.3),
-      (65, -5.1),
-      (55, 2.2),
-      (45, 8.8),
-      (35, 16.2),
-      (25, 22.9),
-      (15, 26.1),
-      (5, 26.4),
-      (-5, 26.1),
-      (-15, 24.6),
-      (-25, 21.4),
-      (-35, 16.5),
-      (-45, 9.9),
-      (-55, 2.9),
-      (-65, -6.9),
-      (-75, -29.5),
-      (-85, -42.3))
+    val WeightedObservedPointsTemp: Array[Double] = Array(
+      -16.9, -12.3, -5.1, 2.2, 8.8, 16.2, 22.9, 26.1, 26.4,
+      26.1, 24.6, 21.4, 16.5, 9.9, 2.9, -6.9, -29.5, -42.3)
 
-    polynomialCurves(regionAvg)
+    EnvCurves.polynomialCurves((valLatitude zip WeightedObservedPointsTemp).toArray)
 
   }
 
-  val TmaxCurves = {
+  /**
+   * Get a maximum variable temperature rang value with latitude value
+   * by polynomial curves
+   */
+  val TmaxVariableCurves = {
 
     // The data contains some actual measurements about albedo
     // I assume there is a linear relationship between the maximum variation range of temperature and albedo.
-    val albedo: Array[(Double, Double)] = Array(
-      (85, 0.589),
-      (75, 0.544),
-      (65, 0.452),
-      (55, 0.407),
-      (45, 0.357),
-      (35, 0.309),
-      (25, 0.272),
-      (15, 0.248),
-      (5, 0.254),
-      (-5, 0.241),
-      (-15, 0.236),
-      (-25, 0.251),
-      (-35, 0.296),
-      (-45, 0.358),
-      (-55, 0.426),
-      (-65, 0.513),
-      (-75, 0.602),
-      (-85, 0.617))
+    val valAlbedo: Array[Double] = Array(
+      0.589, 0.544, 0.452, 0.407, 0.357, 0.309, 0.272, 0.248, 0.254,
+      0.241, 0.236, 0.251, 0.296, 0.358, 0.426, 0.513, 0.602, 0.617)
 
-    polynomialCurves(albedo)
+    EnvCurves.polynomialCurves((valLatitude zip valAlbedo).toArray)
   }
-
-  private def polynomialCurves(points: Array[(Double, Double)]) = {
-    val obs = new WeightedObservedPoints()
-    val polynomialDegree = 3
-
-    points.map(x => obs.add(x._1, x._2))
-
-    // Instantiate a third-degree polynomial fitter.
-    val fitter = PolynomialCurveFitter.create(polynomialDegree);
-
-    // Retrieve fitted parameters (coefficients of the polynomial function).
-    val coeff = fitter.fit(obs.toList());
-
-    // Get new polynomial function
-    new PolynomialFunction(coeff);
-  }
-
 }

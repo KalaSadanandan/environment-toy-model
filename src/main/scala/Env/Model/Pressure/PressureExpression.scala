@@ -1,5 +1,17 @@
+/*                                                                      *\
+**    A Toy Model of Environment                           							**
+**    https://github.com/cubean/environment-toy-model.git               **
+\*                                                                      */
+
 package Env.Model.Pressure
 
+/**
+ *  Pressure expression
+ *  Obtain result according temperature and altitude.
+ *
+ *  @author Cubean Liu
+ *  @version 0.1
+ */
 object PressureExpression {
   // static pressure (pressure at sea level) [Pa]
   private val Pb: Double = 101325
@@ -23,11 +35,13 @@ object PressureExpression {
   // universal gas constant = 8.31432   
   private val R = 8.31432
 
-  // temp - temperature
-  // h - height about sea level [m] 
-  def PressureValue(temp: Double, h: Double): Double = {
-    //Pb * math.pow((1 + (Lb / (273.15 + temp)) * (h * 0.3048 - hb)), (-g0 * M / (R * Lb)))
-
-    Pb * math.pow((1 - 0.02257 * (h * 0.3048) / 1000), (-g0 * M / (R * Lb)))
+  /**
+   * Get the pressure value according the temperature and attitude of weather station.[Pa]
+   *
+   * @param temp the temperature value of weather station.[C]
+   * @param altitude the altitude value of weather station. height about sea level [m].
+   */
+  def PressureValue(temp: Double, altitude: Double): Double = {
+    Pb * math.pow((1 - 0.02257 * (altitude * 0.3048) / 1000), (-g0 * M / (R * Lb)))
   }
 }

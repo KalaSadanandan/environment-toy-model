@@ -1,55 +1,48 @@
+/*                                                                      *\
+**    A Toy Model of Environment                           							**
+**    https://github.com/cubean/environment-toy-model.git               **
+\*                                                                      */
+
 package Env.Model.Humidity
 
-import org.apache.commons.math3.fitting._
-import org.apache.commons.math3.analysis.polynomials._
+import Env.Tools._
 
+/**
+ *  Humidity expression
+ *  Obtain result according temperature and pressure.
+ *
+ *  @author Cubean Liu
+ *  @version 0.1
+ */
 object HumidityExpress {
-  private val vaporPressureCurves = {
 
-    // The vapor pressure of water, or saturation vapor pressure, 
-    // increases strongly with increasing temperature:(kPa)
-    val vaporPressure: Array[(Double, Double)] = Array(
-      (-30, 0.049),
-      (-25, 0.081),
-      (-20, 0.126),
-      (-15, 0.191),
-      (-10, 0.287),
-      (-5, 0.422),
-      (0, 0.61),
-      (10, 1.23),
-      (20, 2.34),
-      (30, 4.24),
-      (40, 7.37),
-      (50, 12.33),
-      (60, 19.92),
-      (70, 31.18),
-      (80, 47.34),
-      (90, 70.11),
-      (100, 101.33))
-
-    polynomialCurves(vaporPressure)
-  }
-
+  /**
+   * Get humidity value according the temperature and pressure of weather station.[%]
+   *
+   * @param temp the temperature value of weather station.[C].
+   * @param pressure the pressure value of weather station. [Pa]
+   */
   def HumidityValue(temp: Double, pressure: Double): Double = {
     val hum = pressure / (vaporPressureCurves.value(temp) * 10)
 
     if (hum > 100) 100 else hum
   }
 
-  private def polynomialCurves(points: Array[(Double, Double)]) = {
-    val obs = new WeightedObservedPoints()
-    val polynomialDegree = 3
+  // Get the pressure value by the polynomial curve
+  private val vaporPressureCurves = {
 
-    points.map(x => obs.add(x._1, x._2))
+    val valTempDownZero = -30.0 until 0.0 by 5
+    val valTempUpZero = 0.0 to 100.0 by 10
 
-    // Instantiate a third-degree polynomial fitter.
-    val fitter = PolynomialCurveFitter.create(polynomialDegree);
+    val valTemp = valTempDownZero ++ valTempUpZero
 
-    // Retrieve fitted parameters (coefficients of the polynomial function).
-    val coeff = fitter.fit(obs.toList());
+    // The vapor pressure of water, or saturation vapor pressure, 
+    // increases strongly with increasing temperature:(kPa)
+    val pressureVapor: Array[Double] = Array(
+      0.049, 0.081, 0.126, 0.191, 0.287, 0.422, 0.61,
+      1.23, 2.34, 4.24, 7.37, 12.33, 19.92, 31.18, 47.34, 70.11, 101.33)
 
-    // Get new polynomial function
-    new PolynomialFunction(coeff);
+    EnvCurves.polynomialCurves((valTemp zip pressureVapor).toArray)
   }
 }
 
