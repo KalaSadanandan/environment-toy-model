@@ -12,11 +12,13 @@ Create a toy model of the environment (taking into account things like atmospher
 geography, oceanography, or similar) that evolves over time. Then take measurements at various
 locations (ie weather stations), and then have your program emit that data, as in the following:
 
+
 || Station| Local Time  | Temperature | Pressure |Humidity|Conditions
  ----------------- | ---------------------------- | ------------------
 | Sydney  | 2015-12-23 | 16:02:12  |Rain |  +12.5 | 1010.3 | 97 
 | Melbourne  | 2015-12-25 | 02:30:55  |Snow |  -5.3 | 998.4 | 55 
 | Adelaide  |  2016-01-04 | 23:05:37  |Sunny |  +39.4 | 1114.1 | 12 
+
 
 where temperature is in °C, pressure in hPa, and relative humidity as a %. Obviously you can't give
 it to us as a table (ok, yes, you could feed us markdown, but let's not do that?) so instead submit
