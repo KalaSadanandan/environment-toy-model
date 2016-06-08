@@ -12,7 +12,6 @@ Create a toy model of the environment (taking into account things like atmospher
 geography, oceanography, or similar) that evolves over time. Then take measurements at various
 locations (ie weather stations), and then have your program emit that data, as in the following:
 
-
 || Station| Local Time  | Temperature | Pressure |Humidity|Conditions
  ----------------- | ---------------------------- | ------------------
 | Sydney  | 2015-12-23 | 16:02:12  |Rain |  +12.5 | 1010.3 | 97 
