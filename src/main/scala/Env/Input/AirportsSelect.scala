@@ -34,11 +34,8 @@ object AirportsSelect {
             tokens(9).toFloat, trimQuote(tokens(10)), trimQuote(tokens(11)))
         }
       } catch {
-        case ex: NumberFormatException => {
-          println(l)
-          ex.printStackTrace()
-        }
-        case ex: Exception => ex.printStackTrace()
+        case ex: NumberFormatException => println(l + "\n" + ex)
+        case ex: Exception             => println(ex)
       }
     }
 
@@ -59,20 +56,19 @@ object AirportsSelect {
       if (len == 3) {
         val airports = airportInfo.filter { x => x.IATA.equalsIgnoreCase(iata) }
         if (airports.length > 0) {
-          //airports.map { x => println(x) }
           return airports
         } else printf("Cannot find the IATA code: %s \nPlease input correct IATA code.\n", iata)
       } else {
         val airports = airportInfo.filter { x => x.City.equalsIgnoreCase(iata) && x.IATA != "" }
         if (airports.length > 0) {
-          //airports.map { x => println(x) }
           return airports
         } else printf("Cannot find the city name: %s \nPlease input correct city name.\n", iata)
       }
     } else println("Please input correct IATA code or city name.")
 
-    return null
+    Array()
   }
+
 }
 
 /**

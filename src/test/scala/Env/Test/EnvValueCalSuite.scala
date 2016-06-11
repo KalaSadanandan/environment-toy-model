@@ -38,60 +38,63 @@ class EnvValueCalSpec extends FlatSpec with Matchers {
 
     val weatherInfo = CalWeatherInfo.getWeathInfo(airportInfos(0), x._2)
 
-    val str = "%s|%.2f,%.2f,%.0f|%s|%s|%+.1f|%.1f|%.0f".format(
-      weatherInfo.iata, weatherInfo.latitude, weatherInfo.longitude, weatherInfo.altitude,
-      weatherInfo.dt, weatherInfo.weatherInfo, weatherInfo.temp,
-      weatherInfo.pressure, weatherInfo.humidity)
+    if (weatherInfo != null) {
 
-    println(str)
+      val str = "%s|%.2f,%.2f,%.0f|%s|%s|%+.1f|%.1f|%.0f".format(
+        weatherInfo.iata, weatherInfo.latitude, weatherInfo.longitude, weatherInfo.altitude,
+        weatherInfo.dt, weatherInfo.weatherInfo, weatherInfo.temp,
+        weatherInfo.pressure, weatherInfo.humidity)
 
-    /////////////////////////////////////////////////////////////////////////////////////
-    // Test temperature data
+      println(str)
 
-    val currentDays = DateTimeCal.getLocalDateTime(x._2).getDayOfYear
-    val daysFlags = DateTimeCal.getDaysInSomeDay(x._2)
+      /////////////////////////////////////////////////////////////////////////////////////
+      // Test temperature data
 
-    val tempAvg = TempInLatitude.TemperatureAvgCurves.value(weatherInfo.latitude)
-    //println("tempAvg =" + tempAvg)
+      val currentDays = DateTimeCal.getLocalDateTime(x._2).getDayOfYear
+      val daysFlags = DateTimeCal.getDaysInSomeDay(x._2)
 
-    // In autumn and winter
-    if (currentDays <= daysFlags.daysof0321 || currentDays > daysFlags.daysof0922) {
-      // It is generally colder than average temperature in the Northern Hemisphere 
-      // after considering the effect in one day
-      // and warmer in the Southern Hemisphere with my algorithm.
-      if (weatherInfo.latitude >= 0)
-        it should "generate the lower temperature than average" in {
-          weatherInfo.temp should be <= tempAvg * 1.1
+      val tempAvg = TempInLatitude.TemperatureAvgCurves.value(weatherInfo.latitude)
+      //println("tempAvg =" + tempAvg)
+
+      // In autumn and winter
+      if (currentDays <= daysFlags.daysof0321 || currentDays > daysFlags.daysof0922) {
+        // It is generally colder than average temperature in the Northern Hemisphere 
+        // after considering the effect in one day
+        // and warmer in the Southern Hemisphere with my algorithm.
+        if (weatherInfo.latitude >= 0)
+          it should "generate the lower temperature than average" in {
+            weatherInfo.temp should be <= tempAvg * 1.1
+          }
+        else it should "generate the higher temperature than average" in {
+          weatherInfo.temp should be >= tempAvg * 0.9
         }
-      else it should "generate the higher temperature than average" in {
-        weatherInfo.temp should be >= tempAvg * 0.9
+      } else {
+        if (weatherInfo.latitude < 0)
+          it should "generate the lower temperature than average" in {
+            weatherInfo.temp should be <= tempAvg * 1.1
+          }
+        else it should "generate the higher temperature than average" in {
+          weatherInfo.temp should be >= tempAvg * 0.9
+        }
       }
-    } else {
-      if (weatherInfo.latitude < 0)
-        it should "generate the lower temperature than average" in {
-          weatherInfo.temp should be <= tempAvg * 1.1
-        }
-      else it should "generate the higher temperature than average" in {
-        weatherInfo.temp should be >= tempAvg * 0.9
-      }
-    }
 
-    /////////////////////////////////////////////////////////////////////////////////////
-    // Test the relationship between humidity and conditions
+      /////////////////////////////////////////////////////////////////////////////////////
+      // Test the relationship between humidity and conditions
 
-    if (weatherInfo.humidity >= 100)
-      if (weatherInfo.temp > 0)
-        it should "generate rain" in {
-          weatherInfo.weatherInfo should be("Rain")
-        }
+      if (weatherInfo.humidity >= 100)
+        if (weatherInfo.temp > 0)
+          it should "generate rain" in {
+            weatherInfo.weatherInfo should be("Rain")
+          }
+        else
+          it should "generate rain" in {
+            weatherInfo.weatherInfo should be("Snow")
+          }
       else
-        it should "generate rain" in {
-          weatherInfo.weatherInfo should be("Snow")
+        it should "be Sunny" in {
+          weatherInfo.weatherInfo should be("Sunny")
         }
-    else
-      it should "be Sunny" in {
-        weatherInfo.weatherInfo should be("Sunny")
-      }
+    }
   })
 }
 
@@ -103,7 +106,7 @@ object Sample1 {
   private val dtLocal = DateTimeCal.getCurrentLocalTimeStr
 
   /**
-   * samples of some IATA and local date and time in weather stations 
+   * samples of some IATA and local date and time in weather stations
    */
   val reportingStations: Array[(String, String)] = Array(
 
@@ -138,7 +141,7 @@ object Sample1 {
     // 9.07
     ("TDG", "2016-02-21 13:05:37"),
     ("TDG", "2016-07-14 23:05:37"),
-    
+
     // Checking station in the Northern Hemisphere and 
     // north of the Tropic of Cancer (40.08)
     ("PEK", "2016-01-04 23:05:37"),
@@ -151,16 +154,15 @@ object Sample1 {
     // 57.02
     ("BRR", "2016-01-04 23:05:37"),
     ("BRR", "2016-07-04 23:05:37"),
-    
+
     // 65.03
     ("CSH", "2016-09-23 24:00:00"),
     ("CSH", "2016-01-04 12:00:00"),
-   
+
     // 70.61
     ("K03", "2016-01-04 23:05:37"),
     ("K03", "2016-07-04 23:05:37"))
 }
-
 
 /**
  * get some date time calculation result
@@ -178,9 +180,9 @@ object DateTimeCal {
 
   /**
    * get current local date and time
-   * 
+   *
    * @param dtStr local date and time string
-   * 
+   *
    * @return LocalDateTime
    */
   def getLocalDateTime(dtStr: String) = {

@@ -38,17 +38,26 @@ object CalWeatherInfo {
    * @return WeatherInfo String
    * [SYD|-33.95,151.18,21|2016-06-08T05:52:35Z|Sunny|+14.0|1012.5|85]
    */
-  def getWeatherStr(iada: String, localDT: String): String = {
+  def getWeatherStr(iada: String, localDT: String): Option[String] = {
     val strNow = formatter.format(LocalDateTime.now())
     val infos = AirportsSelect.checkAirport(iada)
 
-    if (infos == null || infos.length == 0) null
-    else {
-      var strText: String = null
+    var strText: String = null
 
-      try {
-        if (infos.length > 1) {
+    try {
+      return infos.length match {
+        case 0 => None
+        case 1 => {
+          val info = getWeathInfo(infos(0), localDT)
+          if (info != null) {
+            strText = "%s|%.2f,%.2f,%.0f|%s|%s|%+.1f|%.1f|%.0f\n".format(
+              info.iata, info.latitude, info.longitude, info.altitude,
+              info.dt, info.weatherInfo, info.temp, info.pressure, info.humidity)
 
+            Some(strText)
+          } else None
+        }
+        case _ => {
           strText = ("\nThere are several airports in " + iada + ": \n")
           infos.map {
             x =>
@@ -56,27 +65,20 @@ object CalWeatherInfo {
                 x.IATA, x.Name, x.City, x.Country,
                 x.Latitude, x.Longitude, x.Altitude, x.Timezone, x.Tz)
           }
-          //strText += ("\nPlease input an IATA code from the list: ")
-        } else {
-
-          val info = getWeathInfo(infos(0), localDT)
-          if (info != null) {
-            strText = "%s|%.2f,%.2f,%.0f|%s|%s|%+.1f|%.1f|%.0f\n".format(
-              info.iata, info.latitude, info.longitude, info.altitude,
-              info.dt, info.weatherInfo, info.temp, info.pressure, info.humidity)
-          }
+          Some(strText)
         }
-
-      } catch {
-        case ex: UnsupportedTemporalTypeException => ex.printStackTrace()
-        case ex: IllegalFormatConversionException => ex.printStackTrace()
-        case ex: IllegalFormatPrecisionException  => ex.printStackTrace()
-
-        case ex: Exception                        => ex.printStackTrace()
       }
 
-      strText
+    } catch {
+      case ex: UnsupportedTemporalTypeException => ex.printStackTrace()
+      case ex: IllegalFormatConversionException => ex.printStackTrace()
+      case ex: IllegalFormatPrecisionException  => ex.printStackTrace()
+
+      case ex: Exception                        => ex.printStackTrace()
+
     }
+
+    None
   }
 
   /**
@@ -105,6 +107,7 @@ object CalWeatherInfo {
     } catch {
       case ex: DateTimeParseException => {
         println(ex)
+        println("Please input correct format of date and time (eg. 2015-12-23 16:02:12).")
         null
       }
       case ex: Exception =>
@@ -134,10 +137,10 @@ case class WeatherInfo(iata: String, latitude: Double, longitude: Double, altitu
 
 /**
  *  main program of Model of environment
- *  get input loop from console: 
+ *  get input loop from console:
  *  1. IATA code or airport English name
  *  2. local date and time with format "yyyy-MM-dd HH:mm:ss"
- *  
+ *
  */
 object EnvValueCalculate extends App {
 
@@ -145,26 +148,29 @@ object EnvValueCalculate extends App {
   //  println(CalWeatherInfo.getWeatherStr("Melbourne", "2015-12-25 02:30:55"))
   //  println(CalWeatherInfo.getWeatherStr("MEL", "2015-12-25 02:30:55"))
 
-  var ok = true
-  while (ok) {
-    print("\nPlease enter an IATA code or city name : ")
+  var flag = true
+  while (flag) {
+
+    println("\nPlease enter an IATA code or city name : ")
     val iata = io.StdIn.readLine
 
     if (!iata.equals("quit")) {
-      print("Please date and time (eg. 2015-12-23 16:02:12) : ")
+      println("Please date and time (eg. 2015-12-23 16:02:12) : ")
       val dt = io.StdIn.readLine
 
       if (!dt.equals("quit")) {
-        val str = CalWeatherInfo.getWeatherStr(iata, dt)
-        if (str != null) println(str)
+        println(CalWeatherInfo.getWeatherStr(iata, dt).getOrElse("Cannot get weather information."))
       } else {
-        ok = false
-        print("program exit")
+        quitProgram
       }
     } else {
-      ok = false
-      print("\nprogram exit")
+      quitProgram
     }
+  }
+
+  def quitProgram() = {
+    flag = false
+    println("Program exit.")
   }
 
 }
