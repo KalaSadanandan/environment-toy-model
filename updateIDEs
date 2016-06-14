@@ -1,8 +1,0 @@
-#!/bin/bash
-
-echo """clean
-update
-eclipse with-source=true
-gen-idea""" | sbt
-
-
