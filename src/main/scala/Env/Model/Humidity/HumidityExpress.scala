@@ -20,7 +20,7 @@ object HumidityExpress {
    * Get humidity value according the temperature and pressure of weather station.[%]
    *
    * @param temp the temperature value of weather station.[C].
-   * @param pressure the pressure value of weather station. [Pa]
+   * @param pressure the pressure value of weather station. [hPa]
    */
   def HumidityValue(temp: Double, pressure: Double): Double = {
     val hum = pressure / (vaporPressureCurves.value(temp) * 10)

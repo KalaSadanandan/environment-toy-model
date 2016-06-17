@@ -38,9 +38,9 @@ object CalWeatherInfo {
    * @return WeatherInfo String
    * [SYD|-33.95,151.18,21|2016-06-08T05:52:35Z|Sunny|+14.0|1012.5|85]
    */
-  def getWeatherStr(iada: String, localDT: String): Option[String] = {
+  def getWeatherStr(iata: String, localDT: String): Option[String] = {
     val strNow = formatter.format(LocalDateTime.now())
-    val infos = AirportsSelect.checkAirport(iada)
+    val infos = AirportsSelect.checkAirport(iata)
 
     var strText: String = null
 
@@ -50,7 +50,7 @@ object CalWeatherInfo {
         case 1 => {
           val info = getWeathInfo(infos(0), localDT)
           if (info != null) {
-            strText = "%s|%.2f,%.2f,%.0f|%s|%s|%+.1f|%.1f|%.0f\n".format(
+            strText = "%s|%.2f,%.2f,%.0f|%s|%s|%+.1f|%.1f|%.0f".format(
               info.iata, info.latitude, info.longitude, info.altitude,
               info.dt, info.weatherInfo, info.temp, info.pressure, info.humidity)
 
@@ -58,7 +58,7 @@ object CalWeatherInfo {
           } else None
         }
         case _ => {
-          strText = ("\nThere are several airports in " + iada + ": \n")
+          strText = ("\nThere are several airports in " + iata + ": \n")
           infos.map {
             x =>
               strText += "%s|%s|%s|%s|%.2f,%.2f,%.2f|%.2f|%s\n".format(
@@ -84,23 +84,23 @@ object CalWeatherInfo {
   /**
    * get weather information class
    *
-   * @param iada 3-letter IATA code
+   * @param ai airport info
    * @param localDT local date and time
    *
    * @return WeatherInfo
    *
    */
-  def getWeathInfo(x: AirportInfo, localDT: String): WeatherInfo = {
+  def getWeathInfo(ai: AirportInfo, localDT: String): WeatherInfo = {
     try {
       val dt = LocalDateTime.parse(localDT, formatter)
-      val zoneDT = ZonedDateTime.of(dt, ZoneId.of(x.Tz))
+      val zoneDT = ZonedDateTime.of(dt, ZoneId.of(ai.Tz))
 
-      val temp = TempExpression.TempValue(x.Latitude, dt)
-      val pressure = PressureExpression.PressureValue(temp, x.Altitude) / 100
+      val temp = TempExpression.TempValue(ai.Latitude, dt)
+      val pressure = PressureExpression.PressureValue(temp, ai.Altitude)
       val humidity = HumidityExpress.HumidityValue(temp, pressure)
       val weatherInfo = ConditionsExpress.HumidityValue(temp, humidity)
 
-      WeatherInfo(x.IATA, x.Latitude, x.Longitude, x.Altitude,
+      WeatherInfo(ai.IATA, ai.Latitude, ai.Longitude, ai.Altitude,
         zoneDT.format(DateTimeFormatter.ISO_INSTANT),
         weatherInfo, temp, pressure, humidity)
 
@@ -127,7 +127,7 @@ object CalWeatherInfo {
  * @param dt ISO date time string.
  * @param weatherInfo weather information string [Sunny, Rain or Snow]
  * @param temp the temperature value of weather station.[C].
- * @param pressure the pressure value of weather station. [Pa]
+ * @param pressure the pressure value of weather station. [hPa]
  * @param humidity the humidity value of weather station. [%]
  *
  */
