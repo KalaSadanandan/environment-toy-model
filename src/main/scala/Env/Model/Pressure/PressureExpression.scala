@@ -36,12 +36,12 @@ object PressureExpression {
   private val R = 8.31432
 
   /**
-   * Get the pressure value according the temperature and attitude of weather station.[Pa]
+   * Get the pressure value according the temperature and attitude of weather station.[hPa]
    *
    * @param temp the temperature value of weather station.[C]
    * @param altitude the altitude value of weather station. height about sea level [m].
    */
   def PressureValue(temp: Double, altitude: Double): Double = {
-    Pb * math.pow((1 - 0.02257 * (altitude * 0.3048) / 1000), (-g0 * M / (R * Lb)))
+    Pb * math.pow((1 - 0.02257 * (altitude * 0.3048) / 1000), (-g0 * M / (R * Lb))) / 100
   }
 }
