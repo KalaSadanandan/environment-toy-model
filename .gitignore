@@ -1,9 +1,31 @@
-/.settings
-/bin/
-/target/
-/project/target/
-/project/project/target/
+
+#/project/target/
+#/project/project/target/
+
+
+*.class
+*.log
+
+# sbt specific
+.cache
 .cache-main
 .cache-tests
-.classpath
+.history
+.lib/
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
 
+# Ignore Eclipse files
+.project
+.classpath
+.prefs
+.settings
+
+# Scala-IDE specific
+.scala_dependencies
+.worksheet
+/bin/

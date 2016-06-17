@@ -1,6 +1,7 @@
      
 # **A toy model of the environment**
 [![Build Status](https://travis-ci.org/cubean/environment-toy-model.svg?branch=master)](https://travis-ci.org/cubean/environment-toy-model)
+[![codecov](https://codecov.io/gh/cubean/environment-toy-model/branch/master/graph/badge.svg)](https://codecov.io/gh/cubean/environment-toy-model)
 
 ## **Overview**
 
