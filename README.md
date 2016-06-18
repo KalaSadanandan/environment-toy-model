@@ -3,10 +3,6 @@
 [![Build Status](https://travis-ci.org/cubean/environment-toy-model.svg?branch=master)](https://travis-ci.org/cubean/environment-toy-model)
 [![Coverage Status](https://coveralls.io/repos/github/cubean/environment-toy-model/badge.svg?branch=master)](https://coveralls.io/github/cubean/environment-toy-model?branch=master)
 
-##[![codecov](https://codecov.io/gh/cubean/environment-toy-model/branch/master/graph/badge.svg)](https://codecov.io/gh/cubean/environment-toy-model)
-
-
-
 ## **Overview**
 
 This is a toy model of the environment.
