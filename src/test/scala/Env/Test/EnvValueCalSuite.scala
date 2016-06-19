@@ -11,6 +11,7 @@ import org.scalatest.junit.JUnitRunner
 
 import java.time._
 import java.time.format._
+import java.io._
 
 import Env.Cal._
 import Env.Model.Temperature._
@@ -131,6 +132,26 @@ class EnvValueCalSpec extends FlatSpec with Matchers {
         }
     }
   })
+
+  /////////////////////////////////////////////////////////////////////////////////////
+  // Test CalWeatherInfo.getWeatherStr with not correct IATA codes.
+
+  val erstr1 = CalWeatherInfo.getWeatherStr("sy", "2016-03-21 23:05:37").getOrElse("Cannot get weather information.")
+
+  "Exceptional IATA code" should "generate warning string" in {
+    erstr1 should equal("Cannot get weather information.")
+  }
+
+  val erstr2 = CalWeatherInfo.getWeatherStr("sydney", "2016-03-21 23:05:37").getOrElse("Cannot get weather information.")
+
+  val strResult = "\nThere are several airports in sydney: \n" +
+    "YQY|Sydney|Sydney|Canada|46.16,-60.05,203.00|-4.00|America/Halifax\n" +
+    "BWU|Sydney Bankstown|Sydney|Australia|-33.92,150.99,29.00|10.00|Australia/Sydney\n" +
+    "SYD|Sydney Intl|Sydney|Australia|-33.95,151.18,21.00|10.00|Australia/Sydney\n"
+  "Entering a city name" should "generates serveral selections if the number of the airports is more than one." in {
+    erstr2 should equal(strResult)
+  }
+
 }
 
 /**
