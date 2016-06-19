@@ -2,6 +2,8 @@
 # **A toy model of the environment**
 [![Build Status](https://travis-ci.org/cubean/environment-toy-model.svg?branch=master)](https://travis-ci.org/cubean/environment-toy-model)
 [![Coverage Status](https://coveralls.io/repos/github/cubean/environment-toy-model/badge.svg?branch=master)](https://coveralls.io/github/cubean/environment-toy-model?branch=master)
+[![Stories in Ready](https://badge.waffle.io/cubean/environment-toy-model.svg?label=ready&title=Ready)](http://waffle.io/cubean/environment-toy-model)
+
 
 ## **Overview**
 
