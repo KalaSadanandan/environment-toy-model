@@ -23,7 +23,7 @@ object HumidityExpress {
    * @param pressure the pressure value of weather station. [hPa]
    */
   def HumidityValue(temp: Double, pressure: Double): Double = {
-    val hum = pressure / (vaporPressureCurves.value(temp) * 10)
+    val hum = (pressure / 10) / vaporPressureCurves.value(temp)
 
     if (hum > 100) 100 else hum
   }

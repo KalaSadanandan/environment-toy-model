@@ -17,6 +17,7 @@ import Env.Input._
 import Env.Model.Pressure._
 import Env.Model.Humidity._
 import Env.Model.Conditions._
+import Env.Tools._
 
 /**
  *  Output weather information
@@ -25,9 +26,6 @@ import Env.Model.Conditions._
  *  @version 0.1
  */
 object CalWeatherInfo {
-
-  // the format of input date and time
-  private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
   /**
    * get weather information string
@@ -38,8 +36,8 @@ object CalWeatherInfo {
    * @return WeatherInfo String
    * [SYD|-33.95,151.18,21|2016-06-08T05:52:35Z|Sunny|+14.0|1012.5|85]
    */
-  def getWeatherStr(iata: String, localDT: String): Option[String] = {
-    val strNow = formatter.format(LocalDateTime.now())
+  def getWeatherStr(iata: String, dt: LocalDateTime): Option[String] = {
+
     val infos = AirportsSelect.checkAirport(iata)
 
     var strText: String = null
@@ -48,7 +46,7 @@ object CalWeatherInfo {
       return infos.length match {
         case 0 => None
         case 1 => {
-          val info = getWeathInfo(infos(0), localDT)
+          val info = getWeathInfo(infos(0), dt)
           if (info != null) {
             strText = "%s|%.2f,%.2f,%.0f|%s|%s|%+.1f|%.1f|%.0f".format(
               info.iata, info.latitude, info.longitude, info.altitude,
@@ -90,9 +88,8 @@ object CalWeatherInfo {
    * @return WeatherInfo
    *
    */
-  def getWeathInfo(ai: AirportInfo, localDT: String): WeatherInfo = {
+  def getWeathInfo(ai: AirportInfo, dt: LocalDateTime): WeatherInfo = {
     try {
-      val dt = LocalDateTime.parse(localDT, formatter)
       val zoneDT = ZonedDateTime.of(dt, ZoneId.of(ai.Tz))
 
       val temp = TempExpression.TempValue(ai.Latitude, dt)
@@ -107,7 +104,7 @@ object CalWeatherInfo {
     } catch {
       case ex: DateTimeParseException => {
         println(ex)
-        println("Please input correct format of date and time (eg. 2015-12-23 16:02:12).")
+        println("Exception 01: Please input correct format of date and time (eg. 2015-12-23 16:02:12).")
         null
       }
       case ex: Exception =>
@@ -159,7 +156,8 @@ object EnvValueCalculate extends App {
       val dt = io.StdIn.readLine
 
       if (!dt.equals("quit")) {
-        println(CalWeatherInfo.getWeatherStr(iata, dt).getOrElse("Cannot get weather information."))
+        println(CalWeatherInfo.getWeatherStr(iata, DateTimeCal.getLocalDateTime(dt)).
+            getOrElse("Cannot get weather information."))
       } else {
         quitProgram
       }

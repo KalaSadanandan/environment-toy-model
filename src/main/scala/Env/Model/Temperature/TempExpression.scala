@@ -8,6 +8,7 @@ package Env.Model.Temperature
 import java.text.SimpleDateFormat
 import java.time._
 import java.time.format._
+import Env.Tools._
 
 /**
  *  Temperature expression
@@ -20,7 +21,7 @@ object TempExpression {
 
   /**
    *  Get the temperature value according the latitude and localDateTime of weather station.
-   *  
+   *
    *  @param latitude the latitude value of weather station.
    *  @param dt  the local date and time of weather station.
    */
@@ -32,74 +33,57 @@ object TempExpression {
     // Get the maximum range value of temperature variable
     val tempTmax = math.abs(tempAvg * TempInLatitude.TmaxVariableCurves.value(latitude))
 
+    val PI = math.Pi
+
     // The value revised in a year by earth's orbit
     // I considered the Tropic of Cancer and the Tropic of Capricorn
     val tempReviseYear: Double = {
 
-      // 1
-      // The regions between the Tropic of Cancer and the Tropic of Capricorn
+      // 1 Outside of the Tropics
 
-      // 1.1 when 12.22 < Date <= 6.21, temperature varies in sin curve1
-      // 1.2 when 6.21 < Date <= 12.22 temperature varies in sin curve2
+      // 1.1 North Areas outside of the Tropic of Cancer:
+      // tempReviseYear = tempTmax * sin(t)
+      // t = (Tdays – Tdaysin321) * (2 * Pi / 365) where Tdays from 21th March to 20th Marth of next year.
 
-      // sin curve1
-      // Temperature variable coefficient expression of equator region in a year: 
-      // sin(DayinHottest * 2 * Pi * (2 - La / 23.5) / 365 * w + q) =  1
-      // sin(DayinColdest * 2 * Pi * (2 - La / 23.5) / 365 * w + q) = -1
+      // 1.2 South Areas outside of the Tropic of Capricorn:
+      // tempReviseYear = tempTmax * sin (t + Pi)
+      // t = (Tdays – Tdaysin321) * (2 * Pi / 365) where Tdays from 21th March to 20th Marth of next year.
 
-      // sin curve2
-      // Temperature variable coefficient expression of equator region in a year: 
-      // sin(DayinHottest * 2 * Pi * (2 - La / 23.5) / 365 * w + q + Pi * (1 - La / 23.5)) =  1
-      // sin(DayinColdest * 2 * Pi * (2 - La / 23.5) / 365 * w + q + Pi * (1 - La / 23.5)) = -1
+      // 2 The Tropics - regions between the Tropic of Cancer and the Tropic of Capricorn
 
-      // In equator which the latitude is 0, the hottest days are in 21th March 
-      // and 22th September of every year and
-      // the coldest days are in 21th June and 22th December.
-      // Then we could get the value of w and q with 21th March and 21th June. 
-      // Here I ignored some difference between the first half year and the second.
-      // sin curve1
-      // sin(80 * 2 * Pi * 2 / 365 * w + q) = 1, sin(172 * 2 * Pi * 2 / 365 * w + q) = -1
-      // sin curve2
-      // sin(80 * 2 * Pi * 2 / 365 * w + q + Pi ) = 1, 
-      // sin(172 * 2 * Pi * 2 / 365 * w + q + Pi) = -1
-      val w: Double = 365.0 / (2 * 2 * 2 * (172 - 80))
-      val q: Double = math.Pi / 2 - 2 * math.Pi * 172 * 2 * w / 365
+      // The temperature is influenced by the day in one year and its’ latitude.
+      // tempReviseYear = tempTmax * cos (x + t)
+      // x = XLatitude * (Pi/2)/23.45 where XLatitude from -23.45 to 23.45.
+      // t = (Tdays – Tdaysof0321) * (2 * Pi / days of this year) where Tdays from the begin of this year to 21th June.
+      // t = (Tdaysof0922 - Tdays) * (2 * Pi / days of this year) where Tdays from 22th Jun to 22th Dec.
+      // t = (Tdays - Tdaysof0321 of next year – days of next year) * (2 * Pi / days of next year) where Tdays from 23th Dec to the end of this year.
 
-      // 2
-      // The regions out of the Tropic of Cancer and  the Tropic of Capricorn
-      // sin(DayinHottest * 2 * Pi * / 365 + q) =  1
-      val qOut: Double = math.Pi / 2 - 2 * math.Pi * 172 / 365
+      val allDays = DateTimeCal.getDTOfSomeDay(dt)
+      if (allDays != null) {
+        val absDays = DateTimeCal.getDaysfrom0321(dt)
+        val relativeDays = DateTimeCal.getRelaDaysfrom0321(dt)
 
-      // There is half a cycle difference in south region.
-      val southRegionOut = if (latitude < 0) math.Pi else 0
-      val southRegion = if (latitude < 0) -1 else 1
+        // There is half a cycle difference in south region.
+        val southRegion = if (latitude < 0) PI else 0
 
-      val currentDays = dt.getDayOfYear
-      val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        if (latitude > GeographyInfo.laTropicofCapricorn &&
+          latitude < GeographyInfo.laTropicofCancer) {
 
-      val dayslast1222 = LocalDateTime.parse((dt.getYear - 1).toString() + "-12-22 00:00:00", formatter);
-      val daysin0621 = LocalDateTime.parse((dt.getYear).toString() + "-06-21 00:00:00", formatter);
-      val daysin0922 = LocalDateTime.parse((dt.getYear).toString() + "-09-22 00:00:00", formatter);
-      val daysin1222 = LocalDateTime.parse((dt.getYear).toString() + "-12-22 00:00:00", formatter);
+          // 2 The Tropics - regions between the Tropic of Cancer and the Tropic of Capricorn
+          tempTmax * (math.cos(latitude * (PI / 2) / GeographyInfo.laTropicofCancer -
+            (relativeDays * (2 * PI / DateTimeCal.daysOneYear(dt)))))
 
-      val absLatitude = math.abs(latitude)
-      if (latitude > -23.5 && latitude < 23.5) {
-        if (dt.isAfter(dayslast1222) && dt.isBefore(daysin0922))
-          tempTmax * math.sin(currentDays * 2 * math.Pi * (2 - absLatitude / 23.5) * w / 365 + q) * southRegion
-        else {
-          tempTmax * math.sin(currentDays * 2 * math.Pi * (2 - absLatitude / 23.5) * w / 365 + q +
-            math.Pi * (1 - absLatitude / 23.5)) * southRegion
-        }
-      } else
-        tempTmax * math.sin(currentDays * 2 * math.Pi / 365 + qOut) * southRegion
+        } else
+          // 1 Outside of the Tropics
+          tempTmax * math.sin(absDays * 2 * PI / DateTimeCal.daysOneYear(dt) + southRegion)
+      } else 0
     }
 
     // The value revised with day and night by earth rotation
     // I assumed the maximum variation range of temperature in a day is 10% of the latitude value.
     val tempReviseDay: Double = {
       math.abs(tempAvg) * 0.1 *
-        math.cos((dt.getHour * 3600 + dt.getMinute * 60 + dt.getSecond) *
-          2 * math.Pi / (24 * 3600)) * (-1)
+        math.cos(DateTimeCal.getTotalSecondsOfDay(dt) * 2 * PI / (24 * 3600)) * (-1)
     }
 
     //    println("tempReviseYear:  " + dt.getMonth + "|" + tempReviseYear)
