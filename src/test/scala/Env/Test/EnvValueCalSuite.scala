@@ -114,20 +114,20 @@ class EnvValueCalSpec extends FlatSpec with Matchers {
 
         /////////////////////////////////////////////////////////////////////////////////////
         // Test atmospheric pressure
-        // Average sea-level pressure is 1013.25 hPa and record highs close to 1085.0 hbar.
-        // So the highest value should lower than 1013.25 hPa and the lowest value should 
-        // higher than 72 hPa considering the location of airport. 
+        // Average sea-level pressure is 1013.25 hPa and record highs in airports close to 1085.0 hPa. 
+        // Generally, the pressure in airport should higher than 500hPa and lower than 1100.0hPa. 
+        // So, Pressure should (be >= 500 and be <= 1100).
 
         val pressure = PressureExpression.PressureValue(weatherInfo.temp, weatherInfo.altitude)
 
         it should "generate a reasonalbe Atmospheric Pressure value" in {
-          pressure should be(1013.25 +- 72.0)
+          pressure should (be >= 500.0 and be <= 1100.0)
         }
 
         /////////////////////////////////////////////////////////////////////////////////////
         // Test the relationship humidity value
 
-        val humidity = HumidityExpress.HumidityValue(weatherInfo.temp, weatherInfo.pressure).toInt
+        val humidity = math.round(HumidityExpress.HumidityValue(weatherInfo.temp, weatherInfo.pressure)).toInt
 
         it should "generate a reasonalbe Humidity value" in {
           humidity should (be > 0 and be <= 100)
