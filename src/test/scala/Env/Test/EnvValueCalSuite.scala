@@ -73,6 +73,12 @@ class EnvValueCalSpec extends FlatSpec with Matchers {
           // Get the maximum range value of temperature variable
           val tempTmax = math.abs(tempAvg * TempInLatitude.TmaxVariableCurves.value(weatherInfo.latitude))
 
+          // Test all regions
+          it should "generate a reasonable temperature value" in {
+            val Tmax = math.abs(tempAvg) * 1.1 + math.abs(tempTmax)
+            weatherInfo.temp should (be >= -Tmax and be <= Tmax)
+          }
+
           // Test the areas far from the Equator
           if (dt.isBefore(dtAll.dt0321) || dt.isAfter(dtAll.dt0922)) {
             // Sun is above the southern Hemisphere.
@@ -102,9 +108,7 @@ class EnvValueCalSpec extends FlatSpec with Matchers {
           // Test the areas near to the Equator
           if (weatherInfo.latitude <= GeographyInfo.laTropicofCancer / 2 &&
             weatherInfo.latitude >= GeographyInfo.laTropicofCapricorn / 2) {
-            it should "generate a normal temperature value" in {
-              weatherInfo.temp should (be >= tempAvg * 0.9 - tempTmax and be <= tempAvg * 1.1 + tempTmax)
-            }
+            // maybe we should do sth.
           }
         }
 
@@ -259,8 +263,7 @@ object Sample1 {
 
     // 70.61
     ("K03", "2016-01-04 23:05:37"),
-    ("K03", "2016-07-04 23:05:37")
-    )
+    ("K03", "2016-07-04 23:05:37"))
 }
 
 
